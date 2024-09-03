@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentNest</title>
+</head>
+<body>
+    <h1>all Listings</h1>
+    <form method="GET" action="/listings/new">
+        <button>Create new Listing</button>
+    </form>
+    <ul>
+        <% for(let listing of allListing){ %>
+                <!-- when we will click on title we will get data -->
+                <li> <a href="/listings/<%= listing._id %>"><%= listing.title %></a></li> 
+        <% } %>
+        </ul>
+</body>
+</html>
