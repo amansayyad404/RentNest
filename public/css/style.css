@@ -94,8 +94,8 @@ body{
 
 /* edit-page  */
 .edit-btn{
-    background-color: #fe424d !important;
     border: none !important;
+    background-color: #fe424d !important;
 }
 
 /* show-page  */
@@ -109,4 +109,5 @@ body{
 .show-card{
     padding-left: 0;
     padding-right: 0;
+
 }
