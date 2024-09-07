@@ -7,6 +7,7 @@ const methodOverride =require("method-override")//HTML forms only support GET an
 const ejsMate =require("ejs-mate"); //used for common boilerplate code like footer header
 const wrapAsync=require("./utils/wrapAsync.js") //handel async error
 const ExpressError=require("./utils/ExpressError.js")
+const {listingSchema} =require("./schema.js"); //schema validation using Joi
 
 const MONGO_URL ="mongodb://127.0.0.1:27017/RentNext" //connecting db------------------//
 main().then(()=>{
@@ -32,6 +33,19 @@ app.use(express.static(path.join(__dirname,"/public"))) //to use static files fr
 app.get("/",(req,res)=>{
     res.send("iam root")
 })
+
+//check schema of listing from incoming req.body
+const validateListing =(req,res,next)=>{ 
+    let {error}= listingSchema.validate(req.body)  // This ensures the incoming data matches the schema's structure and rules.
+    if(error){
+        let errMsg =error.details.map((ele)=>ele.message).join(",");
+     throw new ExpressError(400,errMsg);
+
+    }else{
+        next();
+    }
+}
+
 //index route
 app.get("/listings",wrapAsync(async (req,res)=>{
     const allListing =await Listing.find({}); //we are getting all data and sending it in allListing 
@@ -52,11 +66,9 @@ app.get("/listings/:id",wrapAsync(async (req,res)=>{ //when we click on title th
 }));
 
 //create route
-app.post("/listings",wrapAsync(async (req,res,next) =>{
+app.post("/listings", validateListing, wrapAsync(async (req,res,next) =>{
    
-    if(!req.body.listing){ //if there is no listing in req.body we will throw err
-        throw new ExpressError(400,"Send Valid Data For Listing");
-    }
+       
         const newlisting=new Listing(req.body.listing);
         await newlisting.save();
         res.redirect("/listings");
@@ -72,11 +84,7 @@ app.get("/listings/:id/edit",wrapAsync(async(req,res)=>{
 }));
 
 //update route
-app.put("/listings/:id",wrapAsync(async(req,res)=>{
-    if(!req.body.listing){ //if there is no listing in req.body we will throw err
-        throw new ExpressError(400,"Send Valid Data For Listing");
-    }
-
+app.put("/listings/:id",validateListing,wrapAsync(async(req,res)=>{
     let {id}= req.params;
   await  Listing.findByIdAndUpdate(id,{...req.body.listing})
  res.redirect(`/listings/${id}`)
@@ -102,7 +110,7 @@ app.use((err,req,res,next)=>{       //created a middelware for handling error!
    
     let{ statusCode=500 ,message="Something went wrong" }= err;  // Destructuring 'statusCode' and 'message' from the error object (err)
    res.status(statusCode).render("error.ejs",{message})
-    // res.status(statusCode).send(message)  // Sending the error message back to the client
+  //Sending the error message back to the client
 })
 
 // ---------------------------------------------------
