@@ -27,7 +27,13 @@ const listingSchema =new Schema({
     },
     country:{
         type:String,
-    }
+    },
+    reviews:[
+        {
+            type : Schema.ObjectId, // Each review is referenced by its unique ObjectId from the 'Review' collection
+            ref : "Review",
+        }
+    ]
 });
 
 const Listing =mongoose.model("Listing",listingSchema);
