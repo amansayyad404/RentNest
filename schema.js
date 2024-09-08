@@ -1,5 +1,6 @@
 
-const Joi= require("joi") //Joi is a popular JavaScript library used for schema validation.
+const Joi= require("joi"); //Joi is a popular JavaScript library used for schema validation.
+const review = require("./models/review");
 
 module.exports.listingSchema= Joi.object({
     listing : Joi.object({
@@ -12,3 +13,10 @@ module.exports.listingSchema= Joi.object({
                                             // It can be an empty string or null (meaning the image field can be left blank or unset).
     }).required() 
 });
+
+module.exports.reviewSchema = Joi.object({
+    review :Joi.object({
+        rating:Joi.number().required().min(1).max(5),
+        comment:Joi.string().required(),
+    }).required(),
+})
