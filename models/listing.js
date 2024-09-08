@@ -1,6 +1,6 @@
 const mongoose =require("mongoose");
 const Schema =mongoose.Schema;
-
+const Review =require("./review.js");
 
 const listingSchema =new Schema({
 
@@ -35,6 +35,17 @@ const listingSchema =new Schema({
         }
     ]
 });
+
+//when we delete any listing then all reviews associted with that review should be deleted
+listingSchema.post("findOneAndDelete",async(listing)=>{
+    if(listing){
+       
+        // listing.reviews contains an array of "review IDs"
+        // The $in operator selects all reviews where the _id is in the listing.reviews array
+        await Review.deletemany({_id :{$in :listing.reviews}});
+    }
+})
+// ----------------------------------------------------------------
 
 const Listing =mongoose.model("Listing",listingSchema);
 module.exports =Listing;

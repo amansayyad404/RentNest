@@ -72,7 +72,8 @@ app.get("/listings/new",(req,res)=>{
 //show route
 app.get("/listings/:id",wrapAsync(async (req,res)=>{ //when we click on title then it will lead to spesific id
     let {id}= req.params;
-   const listing=await Listing.findById(id);
+   const listing=await Listing.findById(id).populate("reviews");// .populate("reviews") ensures that instead of just storing the ObjectIds,
+                                                                // it fetches the full review data associated with each ObjectId.
    res.render("listings/show.ejs", {listing});
 }));
 
@@ -109,8 +110,8 @@ app.delete("/listings/:id",wrapAsync(async(req,res)=>{
 
 }));
 
-//reviews
-//post route
+//reviews -----------------
+//post review route
 app.post("/listings/:id/reviews",validateReview, wrapAsync(async(req,res)=>{
     let listing =await Listing.findById(req.params.id);// Find the "listing" by its ID (from the URL parameter ":id")
     let newReview =new Review(req.body.review);// Create a new review from the data provided in the request body 
@@ -122,6 +123,16 @@ app.post("/listings/:id/reviews",validateReview, wrapAsync(async(req,res)=>{
 
     res.redirect(`/listings/${listing._id}`)
 
+}));
+
+//review delete route
+app.delete("/listings/:id/reviews/:reviewId", wrapAsync(async(req,res)=>{
+    let {id,reviewId}=req.params;
+    // Find the listing by its ID and remove the review reference (ObjectId) from the 'reviews' array
+    await Listing.findByIdAndUpdate(id,{$pull:{reviews: reviewId}});// $pull operator removes the reviewId from the 'reviews' array in the listing
+    await Review.findByIdAndDelete(reviewId);// Find the review by its ID and delete the review document from the 'Review' collection
+
+    res.redirect(`/listings/${id}`);
 }));
 
 
