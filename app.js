@@ -10,6 +10,8 @@ const ExpressError=require("./utils/ExpressError.js")
 const {listingSchema, reviewSchema} =require("./schema.js"); //schema validation using Joi
 const Review =require("./models/review.js");
 
+const listings = require("./routes/listing.js")
+
 const MONGO_URL ="mongodb://127.0.0.1:27017/RentNext" //connecting db------------------//
 main().then(()=>{
     console.log("connected to DB")
@@ -35,17 +37,7 @@ app.get("/",(req,res)=>{
     res.send("iam root")
 })
 
-//check schema of listing from incoming req.body
-const validateListing =(req,res,next)=>{ 
-    let {error}= listingSchema.validate(req.body)  // This ensures the incoming data matches the schema's structure and rules.
-    if(error){
-        let errMsg =error.details.map((ele)=>ele.message).join(",");
-     throw new ExpressError(400,errMsg);
 
-    }else{
-        next();
-    }
-}
 const validateReview =(req,res,next)=>{ 
     let {error}= reviewSchema.validate(req.body)  // This ensures the incoming data matches the schema's structure and rules.
     if(error){
@@ -56,59 +48,8 @@ const validateReview =(req,res,next)=>{
         next();
     }
 }
-// ---------------------------------------------------------
-//index route
-app.get("/listings",wrapAsync(async (req,res)=>{
-    const allListing =await Listing.find({}); //we are getting all data and sending it in allListing 
-    res.render("listings/index.ejs", {allListing});
-}));
 
-//new route
-app.get("/listings/new",(req,res)=>{
-    res.render("listings/new.ejs");
-})
-
-
-//show route
-app.get("/listings/:id",wrapAsync(async (req,res)=>{ //when we click on title then it will lead to spesific id
-    let {id}= req.params;
-   const listing=await Listing.findById(id).populate("reviews");// .populate("reviews") ensures that instead of just storing the ObjectIds,
-                                                                // it fetches the full review data associated with each ObjectId.
-   res.render("listings/show.ejs", {listing});
-}));
-
-//create route
-app.post("/listings", validateListing, wrapAsync(async (req,res,next) =>{
-   
-       
-        const newlisting=new Listing(req.body.listing);
-        await newlisting.save();
-        res.redirect("/listings");
-
-})
-);
-
-//edit route
-app.get("/listings/:id/edit",wrapAsync(async(req,res)=>{
-    let {id}= req.params;
-    const listing=await Listing.findById(id);
-    res.render("listings/edit.ejs",{listing})
-}));
-
-//update route
-app.put("/listings/:id",validateListing,wrapAsync(async(req,res)=>{
-    let {id}= req.params;
-  await  Listing.findByIdAndUpdate(id,{...req.body.listing})
- res.redirect(`/listings/${id}`)
-}));
-
-//delete route
-app.delete("/listings/:id",wrapAsync(async(req,res)=>{
-    let {id}= req.params;
-    let deleteListing =await Listing.findByIdAndDelete(id)
-    res.redirect("/listings")
-
-}));
+app.use("/listings",listings);
 
 //reviews -----------------
 //post review route
