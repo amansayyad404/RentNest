@@ -1,8 +1,8 @@
 const express =require("express")
-const router = express.Router();
+const router = express.Router();//function used to create a new router object that can handle routes and middleware separately from the main application.
 const wrapAsync=require("../utils/wrapAsync.js") //handel async error
 const ExpressError=require("../utils/ExpressError.js")
-const {listingSchema, reviewSchema} =require("../schema.js"); //schema validation using Joi
+const { listingSchema } =require("../schema.js"); //schema validation using Joi
 const Listing =require("../models/listing.js");
 
 

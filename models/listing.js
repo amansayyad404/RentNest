@@ -42,7 +42,7 @@ listingSchema.post("findOneAndDelete",async(listing)=>{
        
         // listing.reviews contains an array of "review IDs"
         // The $in operator selects all reviews where the _id is in the listing.reviews array
-        await Review.deletemany({_id :{$in :listing.reviews}});
+        await Review.deleteMany({_id :{$in :listing.reviews}});
     }
 })
 // ----------------------------------------------------------------

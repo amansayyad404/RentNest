@@ -1,16 +1,14 @@
 const express = require("express");
 const app = express();
 const mongoose =require("mongoose")
-const Listing =require("./models/listing.js");
 const path=require("path");
 const methodOverride =require("method-override")//HTML forms only support GET and POST methods, so method-override helps to bypass this limitation 
 const ejsMate =require("ejs-mate"); //used for common boilerplate code like footer header
-const wrapAsync=require("./utils/wrapAsync.js") //handel async error
 const ExpressError=require("./utils/ExpressError.js")
-const {listingSchema, reviewSchema} =require("./schema.js"); //schema validation using Joi
-const Review =require("./models/review.js");
 
-const listings = require("./routes/listing.js")
+
+const listings = require("./routes/listing.js"); //routes
+const reviews =require("./routes/review.js");    //routes
 
 const MONGO_URL ="mongodb://127.0.0.1:27017/RentNext" //connecting db------------------//
 main().then(()=>{
@@ -38,43 +36,10 @@ app.get("/",(req,res)=>{
 })
 
 
-const validateReview =(req,res,next)=>{ 
-    let {error}= reviewSchema.validate(req.body)  // This ensures the incoming data matches the schema's structure and rules.
-    if(error){
-        let errMsg =error.details.map((ele)=>ele.message).join(",");
-     throw new ExpressError(400,errMsg);
-
-    }else{
-        next();
-    }
-}
 
 app.use("/listings",listings);
+app.use("/listings/:id/reviews",reviews);
 
-//reviews -----------------
-//post review route
-app.post("/listings/:id/reviews",validateReview, wrapAsync(async(req,res)=>{
-    let listing =await Listing.findById(req.params.id);// Find the "listing" by its ID (from the URL parameter ":id")
-    let newReview =new Review(req.body.review);// Create a new review from the data provided in the request body 
-
-    listing.reviews.push(newReview);// Add the newly created review's reference (its ObjectId) to the 'reviews' array of the listing
-
-    await newReview.save();// Save the new review document in the database
-    await listing.save();// Save the updated listing document (with the newly added review reference)
-
-    res.redirect(`/listings/${listing._id}`)
-
-}));
-
-//review delete route
-app.delete("/listings/:id/reviews/:reviewId", wrapAsync(async(req,res)=>{
-    let {id,reviewId}=req.params;
-    // Find the listing by its ID and remove the review reference (ObjectId) from the 'reviews' array
-    await Listing.findByIdAndUpdate(id,{$pull:{reviews: reviewId}});// $pull operator removes the reviewId from the 'reviews' array in the listing
-    await Review.findByIdAndDelete(reviewId);// Find the review by its ID and delete the review document from the 'Review' collection
-
-    res.redirect(`/listings/${id}`);
-}));
 
 
 
