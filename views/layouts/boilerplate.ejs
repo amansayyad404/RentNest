@@ -14,8 +14,14 @@
 <body>
     <!-- //adding navbar  -->
     <%- include("../includes/navbar.ejs") %> 
-    <div class="container"><%- body %></div>
+
+    <!-- body  -->
+    <div class="container">
+        <%- include("../includes/flash.ejs") %> 
+        <%- body %>
+    </div>
         
+        <!-- footer  -->
     <%- include("../includes/footer.ejs") %> 
 
     
