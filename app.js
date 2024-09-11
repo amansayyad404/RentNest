@@ -7,9 +7,14 @@ const ejsMate =require("ejs-mate"); //used for common boilerplate code like foot
 const ExpressError=require("./utils/ExpressError.js");
 const session=require("express-session"); //manage user sessions
 const flash=require("connect-flash");//toast msg
+const passport =require("passport");
+const LocalStrategy =require("passport-local");
+const User =require("./models/user.js");
 
-const listings = require("./routes/listing.js"); //routes
-const reviews =require("./routes/review.js");    //routes
+const listingsRouter = require("./routes/listing.js"); //routes
+const reviewsRouter =require("./routes/review.js");    //routes
+const userRouter =require("./routes/user.js");    //routes
+
 
 const MONGO_URL ="mongodb://127.0.0.1:27017/RentNext" //connecting db------------------//
 main().then(()=>{
@@ -51,6 +56,12 @@ app.get("/",(req,res)=>{
 app.use(session(sessionOptions));// Middleware to enable session management in the app.
 app.use(flash());
 
+app.use(passport.initialize());//for all req our passport is initialize
+app.use(passport.session());//browser should know which user is send req in that session
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser()); //when user login then we serialize this info in session
+passport.deserializeUser(User.deserializeUser());//when user stop that session we deserialize that info
+
 app.use((req,res,next)=>{
     res.locals.success = req.flash("success");
     res.locals.error =req.flash("error");
@@ -60,8 +71,9 @@ app.use((req,res,next)=>{
 
 
 
-app.use("/listings",listings);
-app.use("/listings/:id/reviews",reviews);
+app.use("/listings",listingsRouter); //routes
+app.use("/listings/:id/reviews",reviewsRouter);//routes
+app.use("/",userRouter);//routes
 
 
 
