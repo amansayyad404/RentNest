@@ -25,8 +25,8 @@ router.get("/new",IsLoggedIn,(req,res)=>{ //we have passed IsLoggedIn middleware
 //show route
 router.get("/:id",wrapAsync(async (req,res)=>{ //when we click on title then it will lead to spesific id
     let {id}= req.params;
-   const listing=await Listing.findById(id).populate("reviews").populate("owner");// .populate("reviews") ensures that instead of just storing the ObjectIds,
-                                                                // it fetches the full review data associated with each ObjectId.
+   const listing=await Listing.findById(id).populate({path:"reviews",populate:{path: "author"}}).populate("owner");
+                                                                
     if(!listing){
         req.flash("error","Listing you requested for does not exist!")
         res.redirect("/listings")
