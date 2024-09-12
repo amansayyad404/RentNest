@@ -4,7 +4,7 @@ const wrapAsync=require("../utils/wrapAsync.js") //handel async error
 const ExpressError=require("../utils/ExpressError.js")
 const { listingSchema } =require("../schema.js"); //schema validation using Joi
 const Listing =require("../models/listing.js");
-const {IsLoggedIn}=require("../middleware.js");
+const {IsLoggedIn, isOwner}=require("../middleware.js");
 
 
 //check schema of listing from incoming req.body
@@ -59,7 +59,7 @@ router.post("/",IsLoggedIn, validateListing, wrapAsync(async (req,res,next) =>{
 );
 
 //edit route
-router.get("/:id/edit",IsLoggedIn,wrapAsync(async(req,res)=>{
+router.get("/:id/edit",IsLoggedIn,isOwner,wrapAsync(async(req,res)=>{
 let {id}= req.params;
 const listing=await Listing.findById(id);
 if(!listing){
@@ -70,7 +70,7 @@ res.render("listings/edit.ejs",{listing})
 }));
 
 //update route
-router.put("/:id",IsLoggedIn,validateListing,wrapAsync(async(req,res)=>{
+router.put("/:id",IsLoggedIn,isOwner,validateListing,wrapAsync(async(req,res)=>{
 let {id}= req.params;
 await  Listing.findByIdAndUpdate(id,{...req.body.listing})
 req.flash("success","Listing Updated!")
@@ -78,7 +78,7 @@ res.redirect(`/listings/${id}`)
 }));
 
 //delete route
-router.delete("/:id",IsLoggedIn,wrapAsync(async(req,res)=>{
+router.delete("/:id",IsLoggedIn,isOwner,wrapAsync(async(req,res)=>{
 let {id}= req.params;
 let deleteListing =await Listing.findByIdAndDelete(id)
 req.flash("success","Listing Deleted!")
