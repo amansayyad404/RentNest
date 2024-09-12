@@ -4,7 +4,7 @@ const wrapAsync=require("../utils/wrapAsync.js") //handel async error
 const ExpressError=require("../utils/ExpressError.js")
 const { listingSchema } =require("../schema.js"); //schema validation using Joi
 const Listing =require("../models/listing.js");
-
+const {IsLoggedIn}=require("../middleware.js");
 
 
 //check schema of listing from incoming req.body
@@ -28,7 +28,8 @@ router.get("/",wrapAsync(async (req,res)=>{
 }));
 
 //new route
-router.get("/new",(req,res)=>{
+router.get("/new",IsLoggedIn,(req,res)=>{ //we have passed IsLoggedIn middleware to check user is logged in to create new listing
+ 
     res.render("listings/new.ejs");
 })
 
@@ -47,7 +48,7 @@ router.get("/:id",wrapAsync(async (req,res)=>{ //when we click on title then it 
 
 
 //create route
-router.post("/", validateListing, wrapAsync(async (req,res,next) =>{
+router.post("/",IsLoggedIn, validateListing, wrapAsync(async (req,res,next) =>{
     const newlisting=new Listing(req.body.listing);
     await newlisting.save();
     req.flash("success","New Listing Created!")
@@ -57,7 +58,7 @@ router.post("/", validateListing, wrapAsync(async (req,res,next) =>{
 );
 
 //edit route
-router.get("/:id/edit",wrapAsync(async(req,res)=>{
+router.get("/:id/edit",IsLoggedIn,wrapAsync(async(req,res)=>{
 let {id}= req.params;
 const listing=await Listing.findById(id);
 if(!listing){
@@ -68,7 +69,7 @@ res.render("listings/edit.ejs",{listing})
 }));
 
 //update route
-router.put("/:id",validateListing,wrapAsync(async(req,res)=>{
+router.put("/:id",IsLoggedIn,validateListing,wrapAsync(async(req,res)=>{
 let {id}= req.params;
 await  Listing.findByIdAndUpdate(id,{...req.body.listing})
 req.flash("success","Listing Updated!")
@@ -76,7 +77,7 @@ res.redirect(`/listings/${id}`)
 }));
 
 //delete route
-router.delete("/:id",wrapAsync(async(req,res)=>{
+router.delete("/:id",IsLoggedIn,wrapAsync(async(req,res)=>{
 let {id}= req.params;
 let deleteListing =await Listing.findByIdAndDelete(id)
 req.flash("success","Listing Deleted!")

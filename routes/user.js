@@ -34,6 +34,7 @@ router.post(
     passport.authenticate( "local", {failureRedirect:'/login' ,failureFlash:true} ),
     async(req,res)=>{
         req.flash("success","welcome back");
+        console.log(req.user);
         res.redirect("/listings");
 })
 
