@@ -33,7 +33,11 @@ const listingSchema =new Schema({
             type : Schema.ObjectId, // Each review is referenced by its unique ObjectId from the 'Review' collection
             ref : "Review",
         }
-    ]
+    ],
+    owner:{
+        type:Schema.Types.ObjectId,
+        ref:"User"
+    }
 });
 
 //when we delete any listing then all reviews associted with that review should be deleted

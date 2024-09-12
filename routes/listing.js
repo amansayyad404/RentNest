@@ -37,7 +37,7 @@ router.get("/new",IsLoggedIn,(req,res)=>{ //we have passed IsLoggedIn middleware
 //show route
 router.get("/:id",wrapAsync(async (req,res)=>{ //when we click on title then it will lead to spesific id
     let {id}= req.params;
-   const listing=await Listing.findById(id).populate("reviews");// .populate("reviews") ensures that instead of just storing the ObjectIds,
+   const listing=await Listing.findById(id).populate("reviews").populate("owner");// .populate("reviews") ensures that instead of just storing the ObjectIds,
                                                                 // it fetches the full review data associated with each ObjectId.
     if(!listing){
         req.flash("error","Listing you requested for does not exist!")
@@ -50,6 +50,7 @@ router.get("/:id",wrapAsync(async (req,res)=>{ //when we click on title then it 
 //create route
 router.post("/",IsLoggedIn, validateListing, wrapAsync(async (req,res,next) =>{
     const newlisting=new Listing(req.body.listing);
+    newlisting.owner=req.user._id;
     await newlisting.save();
     req.flash("success","New Listing Created!")
     res.redirect("/listings");
