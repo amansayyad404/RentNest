@@ -2,24 +2,14 @@ const express =require("express")
 const router = express.Router({mergeParams:true});//function used to create a new router object that can handle routes and middleware separately from the main application.
 const wrapAsync=require("../utils/wrapAsync.js") //handel async error
 const ExpressError=require("../utils/ExpressError.js")
-const { reviewSchema} =require("../schema.js"); //schema validation using Joi
 const Review =require("../models/review.js");
 const Listing =require("../models/listing.js");
+const { validateReview } = require("../middleware.js");
 
 
 
 
-// This ensures the incoming data matches the schema's structure and rules.
-const validateReview =(req,res,next)=>{ 
-    let {error}= reviewSchema.validate(req.body)  
-    if(error){
-        let errMsg =error.details.map((ele)=>ele.message).join(",");
-     throw new ExpressError(400,errMsg);
 
-    }else{
-        next();
-    }
-}
 
 
 //post review route

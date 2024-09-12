@@ -1,23 +1,11 @@
 const express =require("express")
 const router = express.Router();//function used to create a new router object that can handle routes and middleware separately from the main application.
 const wrapAsync=require("../utils/wrapAsync.js") //handel async error
-const ExpressError=require("../utils/ExpressError.js")
-const { listingSchema } =require("../schema.js"); //schema validation using Joi
 const Listing =require("../models/listing.js");
-const {IsLoggedIn, isOwner}=require("../middleware.js");
+const {IsLoggedIn, isOwner, validateListing}=require("../middleware.js");
 
 
-//check schema of listing from incoming req.body
-const validateListing =(req,res,next)=>{ 
-    let {error}= listingSchema.validate(req.body)  // This ensures the incoming data matches the schema's structure and rules.
-    if(error){
-        let errMsg =error.details.map((ele)=>ele.message).join(",");
-     throw new ExpressError(400,errMsg);
 
-    }else{
-        next();
-    }
-}
 
 
 // ---------------------------------------------------------
