@@ -7,25 +7,21 @@ const {IsLoggedIn, isOwner, validateListing}=require("../middleware.js");
 const listingController = require("../controllers/listings.js")
 
 // ---------------------------------------------------------
-//index route
-router.get("/",wrapAsync(listingController.index));
+
+router.route("/") //if req is get then GET will be called and if it is on post then POST will be called
+    .get(wrapAsync(listingController.index)) //index route
+    .post(IsLoggedIn, validateListing, wrapAsync(listingController.createListing));//create route
+
 
 //new route
 router.get("/new",IsLoggedIn,listingController.renderNewForm)
 
-//show route
-router.get("/:id",wrapAsync(listingController.showListing));
-
-//create route
-router.post("/",IsLoggedIn, validateListing, wrapAsync(listingController.createListing));
+router.route("/:id")
+      .get(wrapAsync(listingController.showListing)) //show route
+      .put(IsLoggedIn,isOwner,validateListing,wrapAsync(listingController.updateListing)) //update route
+      .delete(IsLoggedIn,isOwner,wrapAsync(listingController.destroyListing)); //delete route
 
 //edit route
 router.get("/:id/edit",IsLoggedIn,isOwner,wrapAsync(listingController.renderEditForm));
-
-//update route
-router.put("/:id",IsLoggedIn,isOwner,validateListing,wrapAsync(listingController.updateListing));
-
-//delete route
-router.delete("/:id",IsLoggedIn,isOwner,wrapAsync(listingController.destroyListing));
 
 module.exports =router;

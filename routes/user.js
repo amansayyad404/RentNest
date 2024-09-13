@@ -7,23 +7,17 @@ const { saveRedirectUrl } = require("../middleware.js");
 
 const userController = require("../controllers/users.js")
 
+router.route("/signup") //if req is get then GET will be called and if it is on post then POST will be called
+      .get(userController.renderSignUpForm) //renderSignupForm
+      .post(wrapAsync(userController.signUp));  //signup 
 
-//renderSignup
-router.get("/signup",userController.renderSignUpForm);
 
-//signup 
-router.post("/signup",wrapAsync(userController.signUp));
-
-//renderLoginForm 
-router.get("/login",userController.renderLoginForm);
-
-// login 
-router.post(
-    "/login",saveRedirectUrl,
-                        //"local": Indicates you're using the local authentication strategy (username & password).
-    passport.authenticate( "local", {failureRedirect:'/login' ,failureFlash:true} ),
-    userController.login)
-
+router.route("/login")
+      .get(userController.renderLoginForm) //renderLoginForm 
+      .post(saveRedirectUrl,                // login 
+                            //"local": Indicates you're using the local authentication strategy (username & password).
+        passport.authenticate( "local", {failureRedirect:'/login' ,failureFlash:true} ),
+        userController.login)
 
 //logout 
 router.get("/logout",userController.logout)
